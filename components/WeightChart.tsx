@@ -13,6 +13,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  TooltipItem,
 } from "chart.js";
 
 ChartJS.register(
@@ -108,7 +109,7 @@ export function WeightChart() {
     plugins: {
       tooltip: {
         callbacks: {
-          label: (context: any) => {
+          label: (context: TooltipItem<"line">) => {
             const label = context.dataset.label || "";
             const value = context.parsed.y;
             return `${label}: ${value.toFixed(1)} kg`;
