@@ -15,19 +15,19 @@ import { Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ToastProvider";
 
-interface WeightEntry {
+interface WaistEntry {
   id: number;
   created_at: string;
-  weight: number;
+  waist: number;
 }
 
-export default function WeightList() {
-  const [weights, setWeights] = useState<WeightEntry[]>([]);
+export default function WaistList() {
+  const [waistMeasurements, setWaistMeasurements] = useState<WaistEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { showToast } = useToast();
 
-  const fetchWeights = async () => {
+  const fetchWaistMeasurements = async () => {
     setIsLoading(true);
     setError(null);
 
@@ -42,34 +42,34 @@ export default function WeightList() {
     }
 
     const { data, error } = await supabase
-      .from("weights")
-      .select("id, created_at, weight")
+      .from("measurements")
+      .select("id, created_at, waist")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching weights:", error);
-      setError("Failed to fetch weight data");
+      console.error("Error fetching waist measurements:", error);
+      setError("Failed to fetch waist measurement data");
     } else {
-      setWeights(data || []);
+      setWaistMeasurements(data || []);
     }
 
     setIsLoading(false);
   };
 
   useEffect(() => {
-    fetchWeights();
+    fetchWaistMeasurements();
   }, []);
 
   const handleDelete = async (id: number) => {
-    const { error } = await supabase.from("weights").delete().eq("id", id);
+    const { error } = await supabase.from("measurements").delete().eq("id", id);
 
     if (error) {
-      console.error("Error deleting weight entry:", error);
-      showToast("Failed to delete weight entry", "error");
+      console.error("Error deleting waist measurement entry:", error);
+      showToast("Failed to delete waist measurement entry", "error");
     } else {
-      showToast("Weight entry deleted successfully", "success");
-      fetchWeights(); // Refresh the list after deletion
+      showToast("Waist measurement entry deleted successfully", "success");
+      fetchWaistMeasurements(); // Refresh the list after deletion
     }
   };
 
@@ -87,7 +87,7 @@ export default function WeightList() {
   return (
     <Card className="h-full flex flex-col">
       <CardHeader>
-        <CardTitle>Weight History</CardTitle>
+        <CardTitle>Waist Measurement History</CardTitle>
       </CardHeader>
       <CardContent className="flex-grow overflow-auto">
         <Table>
@@ -95,7 +95,7 @@ export default function WeightList() {
             <TableRow>
               <TableHead className="sticky top-0 bg-background">Date</TableHead>
               <TableHead className="sticky top-0 bg-background">
-                Weight (kg)
+                Waist (cm)
               </TableHead>
               <TableHead className="sticky top-0 bg-background">
                 Actions
@@ -103,12 +103,12 @@ export default function WeightList() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {weights.map((entry) => (
+            {waistMeasurements.map((entry) => (
               <TableRow key={entry.id}>
                 <TableCell>
                   {new Date(entry.created_at).toLocaleDateString()}
                 </TableCell>
-                <TableCell>{entry.weight.toFixed(1)}</TableCell>
+                <TableCell>{entry.waist.toFixed(1)}</TableCell>
                 <TableCell>
                   <Button
                     variant="ghost"
