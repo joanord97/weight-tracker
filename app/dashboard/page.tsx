@@ -1,15 +1,17 @@
 import { WeightForm } from "@/components/WeightForm";
-import { WeightChart } from "@/components/WeightChart";
-import { MeasurementsForm } from "@/components/MeasurementsForm";
+import WeightList from "@/components/WeightList";
 
-export default function Dashboard() {
+export default function DashboardPage() {
   return (
-    <main className="flex flex-col items-center justify-start min-h-screen p-4 max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Weight Tracker</h1>
-      <div className="w-full space-y-8">
-        <WeightForm />
-        <MeasurementsForm />
+    <div className="container mx-auto p-4 h-screen flex flex-col">
+      <div className="flex-grow flex flex-col space-y-4 overflow-hidden max-h-[80vh]">
+        <div className="flex-grow overflow-auto">
+          <WeightList />
+        </div>
+        <div className="w-full max-w-md mx-auto">
+          <WeightForm />
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
