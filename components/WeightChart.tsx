@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
+import { useEffect } from "react";
 import { useAuth } from "./AuthProvider";
 import { Line } from "react-chartjs-2";
 import {
@@ -19,6 +18,7 @@ import {
 } from "chart.js";
 import "chartjs-adapter-date-fns";
 import { startOfDay, addDays, isWithinInterval } from "date-fns";
+import { useWeight } from "@/contexts/WeightContext";
 
 ChartJS.register(
   TimeScale,
@@ -30,41 +30,22 @@ ChartJS.register(
   Legend
 );
 
-interface WeightEntry {
-  created_at: string;
-  weight: number;
-}
-
 interface Trend {
   weekly: number;
   daily: number;
 }
 
 export function WeightChart() {
-  const [weights, setWeights] = useState<WeightEntry[]>([]);
   const { user } = useAuth();
+  const { weights, fetchWeights } = useWeight();
 
   useEffect(() => {
     if (user) {
-      fetchWeights();
+      fetchWeights(user.id);
     }
-  }, [user]);
+  }, [user, fetchWeights]);
 
-  const fetchWeights = async () => {
-    const { data, error } = await supabase
-      .from("weights")
-      .select("created_at, weight")
-      .eq("user_id", user?.id)
-      .order("created_at", { ascending: true });
-
-    if (error) {
-      console.error("Error fetching weights:", error);
-    } else {
-      setWeights(data || []);
-    }
-  };
-
-  const groupWeightsByDate = (data: WeightEntry[]): Map<string, number[]> => {
+  const groupWeightsByDate = (data: typeof weights): Map<string, number[]> => {
     const groupedWeights = new Map<string, number[]>();
     data.forEach((entry) => {
       const date = startOfDay(new Date(entry.created_at)).toISOString();
