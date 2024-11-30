@@ -37,6 +37,7 @@ export function WeightForm() {
       await addWeight(user.id, parseFloat(weight));
       showToast("Weight recorded successfully", "success");
     } catch (error) {
+      console.error("Error recording weight:", error);
       showToast("Error recording weight", "error");
     }
     setLoading(false);
