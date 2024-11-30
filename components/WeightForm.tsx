@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/lib/supabase";
 import { useAuth } from "./AuthProvider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ToastProvider";
+import { useWeight } from "@/contexts/WeightContext";
 
 export function WeightForm() {
   const [weight, setWeight] = useState("");
@@ -13,29 +13,14 @@ export function WeightForm() {
   const [fetchingLatest, setFetchingLatest] = useState(true);
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { weights, addWeight } = useWeight();
 
   useEffect(() => {
-    if (user) {
-      fetchLatestWeight();
+    if (user && weights.length > 0) {
+      setWeight(weights[weights.length - 1].weight.toString());
+      setFetchingLatest(false);
     }
-  }, [user]);
-
-  const fetchLatestWeight = async () => {
-    setFetchingLatest(true);
-    const { data, error } = await supabase
-      .from("weights")
-      .select("weight")
-      .eq("user_id", user?.id)
-      .order("created_at", { ascending: false })
-      .limit(1);
-
-    if (error) {
-      showToast("Error fetching latest weight", "error");
-    } else if (data && data.length > 0) {
-      setWeight(data[0].weight.toString());
-    }
-    setFetchingLatest(false);
-  };
+  }, [user, weights]);
 
   const adjustWeight = (amount: number) => {
     const currentWeight = parseFloat(weight) || 0;
@@ -48,14 +33,12 @@ export function WeightForm() {
     if (!user) return;
 
     setLoading(true);
-    const { error } = await supabase
-      .from("weights")
-      .insert({ user_id: user.id, weight: parseFloat(weight) });
-
-    if (error) {
-      showToast(error.message, "error");
-    } else {
+    try {
+      await addWeight(user.id, parseFloat(weight));
       showToast("Weight recorded successfully", "success");
+    } catch (error) {
+      console.error("Error recording weight:", error);
+      showToast("Error recording weight", "error");
     }
     setLoading(false);
   };
